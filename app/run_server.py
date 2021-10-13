@@ -31,7 +31,7 @@ def load_model(model_path):
 		model = dill.load(f)
 	print(model)
 
-modelpath = "/app/app/models/logreg_pipeline.dill"
+modelpath = "/app/app/models/model_RF.dill"
 load_model(modelpath)
 
 @app.route("/", methods=["GET"])
@@ -47,21 +47,31 @@ def predict():
 	# ensure an image was properly uploaded to our endpoint
 	if flask.request.method == "POST":
 
-		description, company_profile, benefits = "", "", ""
+		Rooms, Square, LifeSquare, MedPriceByDistrict, MedPriceByFloorYear = "", "", "", "", ""
 		request_json = flask.request.get_json()
-		if request_json["description"]:
-			description = request_json['description']
+		if request_json["Rooms"]:
+			Rooms = request_json['Rooms']
 
-		if request_json["company_profile"]:
-			company_profile = request_json['company_profile']
+		if request_json["Square"]:
+			Square = request_json['Square']
 
-		if request_json["benefits"]:
-			benefits = request_json['benefits']
-		logger.info(f'{dt} Data: description={description}, company_profile={company_profile}, benefits={benefits}')
+		if request_json["LifeSquare"]:
+			LifeSquare = request_json['LifeSquare']
+
+		if request_json["MedPriceByDistrict"]:
+			MedPriceByDistrict = request_json['MedPriceByDistrict']
+
+		if request_json["MedPriceByFloorYear"]:
+			MedPriceByFloorYear = request_json['MedPriceByFloorYear']
+
+		logger.info(f'{dt} Data: Rooms={Rooms}, Square={Square}, LifeSquare={LifeSquare},'
+					f' MedPriceByDistrict={MedPriceByDistrict}, MedPriceByFloorYear={MedPriceByFloorYear}')
 		try:
-			preds = model.predict_proba(pd.DataFrame({"description": [description],
-												  "company_profile": [company_profile],
-												  "benefits": [benefits]}))
+			preds = model.predict(pd.DataFrame({"Rooms": [Rooms],
+												  "Square": [Square],
+												  "LifeSquare": [LifeSquare],
+													  "MedPriceByDistrict": [MedPriceByDistrict],
+													  "MedPriceByFloorYear": [MedPriceByFloorYear]}))
 		except AttributeError as e:
 			logger.warning(f'{dt} Exception: {str(e)}')
 			data['predictions'] = str(e)
